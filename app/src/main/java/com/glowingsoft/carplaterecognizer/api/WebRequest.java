@@ -1,11 +1,8 @@
 package com.glowingsoft.carplaterecognizer.api;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.glowingsoft.carplaterecognizer.ui.MainActivity;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.ResponseHandlerInterface;
@@ -17,6 +14,7 @@ public class WebRequest {
         //create object of loopj client
         //443 will save you from ssl exception
             client = new AsyncHttpClient(true, 80, 443);
+            client.setTimeout(60 * 1000);
 
 
     }

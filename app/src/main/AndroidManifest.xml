@@ -24,6 +24,14 @@
             android:name=".ui.SettingActivity"
             android:parentActivityName=".ui.MainActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.WithDependencyActivity"
+            android:parentActivityName=".ui.MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.WithApiActivity"
+            android:parentActivityName=".ui.MainActivity"
+            android:screenOrientation="portrait" />
         <activity android:name=".ui.MainActivity"
             android:screenOrientation="portrait" >
             <intent-filter>
