@@ -246,7 +246,7 @@ public class WithApiActivity extends AppCompatActivity  implements IPickResult,V
                 for (int i = 0; i < Jsresults.length(); i++) {
                     JSONObject tabObj = Jsresults.getJSONObject(i);
                     plate_txt.setText(tabObj.getString("plate"));
-                    region_txt.setText(Integer.parseInt(tabObj.getString("score")) * 100);
+                    region_txt.setText(String.valueOf((Double.parseDouble(tabObj.getString("score")) * 100)));
                     vihical_txt.setText(response.getString("processing_time"));
                     timeStamp= response.getString("timestamp");
                         Picasso.with(context)

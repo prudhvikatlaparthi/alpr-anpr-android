@@ -173,121 +173,19 @@ public class WithDependencyActivity extends AppCompatActivity  implements IPickR
                             } catch (JSONException e) {
                                 e.printStackTrace();
                                 Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
+                                progressBar.setVisibility(View.GONE);
+                                editResult.setVisibility(View.GONE);
+                                regionCard.setVisibility(View.GONE);
+                                plateCard.setVisibility(View.GONE);
+                                vihicalCard.setVisibility(View.GONE);
+                                nextImage.setVisibility(View.GONE);
+                                floatingActionButton.setVisibility(View.GONE);
+                                emptyImage.setVisibility(View.VISIBLE);
                             }
                         }
                     });
                 }
             });
-
-            /*countrycode=sharedPreferences.getString("RegionCode","");
-            String baseurl=sharedPreferences.getString("BaseUrl","https://api.platerecognizer.com/v1/plate-reader/");
-
-
-            Log.d("response", "filepath: "+file+" ");
-            try {
-                params.put("upload", new File(compressed));
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            params.put("regions",countrycode);
-            Log.d("response", "image to upload: "+params+" ");
-            WebRequest.post(context,baseurl,params,new JsonHttpResponseHandler()
-            {
-                @Override
-                public void onStart() {
-                    progressBar.setVisibility(View.VISIBLE);
-                    region_txt.setText(null);
-                    plate_txt.setText(null);
-                    vihical_txt.setText(null);
-                    imageView.setImageResource(R.drawable.upload);
-
-                    Log.d("response", "onStart: ");
-                    super.onStart();
-                }
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                    super.onSuccess(statusCode, headers, response);
-
-                    Log.d("response ",response.toString()+" ");
-                    try {
-                        //image path
-                        imagepath="https://us-east-1.linodeobjects.com/platerec-api/uploads/"+df.format(date)+response.getString("filename");
-                        //json array or results
-                        JSONArray Jsresults = response.getJSONArray("results");
-                        if (Jsresults.length()>0)
-                        {
-                            for (int i = 0; i < Jsresults.length(); i++) {
-                                JSONObject tabObj = Jsresults.getJSONObject(i);
-                                plate_txt.setText(tabObj.getString("plate"));
-                                region_txt.setText(tabObj.getJSONObject("region").getString("code"));
-                                vihical_txt.setText(tabObj.getJSONObject("vehicle").getString("type"));
-                                timeStamp=response.getString("timestamp");
-                                    Picasso.with(context)
-                                            .load(imagepath)
-                                            .into(imageView, new Callback() {
-                                                @Override
-                                                public void onSuccess() {
-                                                    progressBar.setVisibility(View.GONE);
-                                                }
-                                                @Override
-                                                public void onError() {
-
-                                                }
-                                            });
-                                regionCard.setVisibility(View.VISIBLE);
-                                plateCard.setVisibility(View.VISIBLE);
-                                vihicalCard.setVisibility(View.VISIBLE);
-                                nextImage.setVisibility(View.VISIBLE);
-                                floatingActionButton.setVisibility(View.VISIBLE);
-                                emptyImage.setVisibility(View.GONE);
-                            }
-
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-                @Override
-                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                    super.onFailure(statusCode, headers, throwable, errorResponse);
-                    Log.d("response1", "onFailure: " + errorResponse + " ");
-                    progressBar.setVisibility(View.GONE);
-                    editResult.setVisibility(View.GONE);
-                    regionCard.setVisibility(View.GONE);
-                    plateCard.setVisibility(View.GONE);
-                    vihicalCard.setVisibility(View.GONE);
-                    nextImage.setVisibility(View.GONE);
-                    floatingActionButton.setVisibility(View.GONE);
-                    emptyImage.setVisibility(View.VISIBLE);
-                    Toast.makeText(MainActivity.this, errorResponse+"", Toast.LENGTH_SHORT).show();
-                }
-                @Override
-                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
-                    super.onFailure(statusCode, headers, throwable, errorResponse);
-                    Log.d("response2", "onFailure: "+errorResponse+" ");
-                    progressBar.setVisibility(View.GONE);
-                    editResult.setVisibility(View.GONE);
-                    regionCard.setVisibility(View.GONE);
-                    plateCard.setVisibility(View.GONE);
-                    vihicalCard.setVisibility(View.GONE);
-                    nextImage.setVisibility(View.GONE);
-                    emptyImage.setVisibility(View.VISIBLE);
-                        Toast.makeText(MainActivity.this,errorResponse.toString()+"",Toast.LENGTH_LONG).show();
-                }
-                @Override
-                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                    super.onFailure(statusCode, headers, responseString, throwable);
-                    Log.d("response3", "onFailure: "+responseString+" ");
-                    progressBar.setVisibility(View.GONE);
-                    editResult.setVisibility(View.GONE);
-                    regionCard.setVisibility(View.GONE);
-                    plateCard.setVisibility(View.GONE);
-                    vihicalCard.setVisibility(View.GONE);
-                    nextImage.setVisibility(View.GONE);
-                    emptyImage.setVisibility(View.VISIBLE);
-                        Toast.makeText(MainActivity.this,responseString+"No Internet Connection",Toast.LENGTH_LONG).show();
-                }
-            });*/
         } else {
             //Handle possible errors
             //TODO: do what you have to do with r.getError();
