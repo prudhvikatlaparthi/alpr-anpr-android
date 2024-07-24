@@ -143,7 +143,7 @@ public class WithDependencyActivity extends AppCompatActivity  implements IPickR
         if (token.equals("")){
             Toast.makeText(context, "Token Not Found", Toast.LENGTH_SHORT).show();
         }else {
-            WebRequest.client.addHeader("Authorization","Token "+token);
+
         }
     }
     //pick result method to get image after getting image form gallary or camera

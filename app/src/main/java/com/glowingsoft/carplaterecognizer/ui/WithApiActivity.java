@@ -3,18 +3,19 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.LinearLayoutCompat;
 import androidx.cardview.widget.CardView;
-import cz.msebera.android.httpclient.Header;
+
+import retrofit2.Call;
+import retrofit2.Response;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
@@ -37,8 +38,8 @@ import android.widget.Toast;
 import com.glowingsoft.carplaterecognizer.R;
 import com.glowingsoft.carplaterecognizer.api.WebRequest;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.loopj.android.http.JsonHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.vansuita.pickimage.bean.PickResult;
@@ -46,18 +47,14 @@ import com.vansuita.pickimage.bundle.PickSetup;
 import com.vansuita.pickimage.dialog.PickImageDialog;
 import com.vansuita.pickimage.enums.EPickType;
 import com.vansuita.pickimage.listeners.IPickResult;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 import java.util.TimeZone;
 
 public class WithApiActivity extends AppCompatActivity  implements IPickResult,View.OnClickListener {
@@ -144,14 +141,13 @@ public class WithApiActivity extends AppCompatActivity  implements IPickResult,V
         if (token.equals("")){
             Toast.makeText(context, "Token Not Found", Toast.LENGTH_SHORT).show();
         }else {
-            WebRequest.client.addHeader("Authorization","Token "+token);
+
         }
     }
     //pick result method to get image after getting image form gallary or camera
     @Override
     public void onPickResult(PickResult r) {
         if (r.getError() == null) {
-            RequestParams params=new RequestParams();
             String file=r.getPath();
             String compressed=compressImage(file);
 
@@ -160,36 +156,31 @@ public class WithApiActivity extends AppCompatActivity  implements IPickResult,V
 
 
             Log.d("response", "filepath: "+file+" ");
-            try {
-                params.put("upload", new File(compressed));
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            params.put("regions",countrycode);
-            Log.d("response", "image to upload: "+params+" ");
-            WebRequest.post(context,baseurl,params,new JsonHttpResponseHandler()
-            {
+            progressBar.setVisibility(View.VISIBLE);
+            region_txt.setText(null);
+            plate_txt.setText(null);
+            vihical_txt.setText(null);
+            imageView.setImageResource(R.drawable.upload);
+            WebRequest.post(new File(compressed),countrycode, "Token "+token, new retrofit2.Callback<JsonObject>() {
                 @Override
-                public void onStart() {
-                    progressBar.setVisibility(View.VISIBLE);
-                    region_txt.setText(null);
-                    plate_txt.setText(null);
-                    vihical_txt.setText(null);
-                    imageView.setImageResource(R.drawable.upload);
-
-                    Log.d("response", "onStart: ");
-                    super.onStart();
+                public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+                    Log.i("Prudhvi Log", "onResponse: "+response);
+                    if (response.body() != null) {
+                        setDataToUi(response.body(), file);
+                    } else {
+                        progressBar.setVisibility(View.GONE);
+                        editResult.setVisibility(View.GONE);
+                        regionCard.setVisibility(View.GONE);
+                        plateCard.setVisibility(View.GONE);
+                        vihicalCard.setVisibility(View.GONE);
+                        nextImage.setVisibility(View.GONE);
+                        floatingActionButton.setVisibility(View.GONE);
+                        emptyImage.setVisibility(View.VISIBLE);
+                    }
                 }
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                    super.onSuccess(statusCode, headers, response);
 
-                    setDataToUi(response);
-                }
                 @Override
-                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                    super.onFailure(statusCode, headers, throwable, errorResponse);
-                    Log.d("response1", "onFailure: " + errorResponse + " ");
+                public void onFailure(Call<JsonObject> call, Throwable t) {
                     progressBar.setVisibility(View.GONE);
                     editResult.setVisibility(View.GONE);
                     regionCard.setVisibility(View.GONE);
@@ -198,33 +189,7 @@ public class WithApiActivity extends AppCompatActivity  implements IPickResult,V
                     nextImage.setVisibility(View.GONE);
                     floatingActionButton.setVisibility(View.GONE);
                     emptyImage.setVisibility(View.VISIBLE);
-                    Toast.makeText(context, errorResponse+"", Toast.LENGTH_SHORT).show();
-                }
-                @Override
-                public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
-                    super.onFailure(statusCode, headers, throwable, errorResponse);
-                    Log.d("response2", "onFailure: "+errorResponse+" ");
-                    progressBar.setVisibility(View.GONE);
-                    editResult.setVisibility(View.GONE);
-                    regionCard.setVisibility(View.GONE);
-                    plateCard.setVisibility(View.GONE);
-                    vihicalCard.setVisibility(View.GONE);
-                    nextImage.setVisibility(View.GONE);
-                    emptyImage.setVisibility(View.VISIBLE);
-                        Toast.makeText(context,errorResponse.toString()+"",Toast.LENGTH_LONG).show();
-                }
-                @Override
-                public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                    super.onFailure(statusCode, headers, responseString, throwable);
-                    Log.d("response3", "onFailure: "+responseString+" ");
-                    progressBar.setVisibility(View.GONE);
-                    editResult.setVisibility(View.GONE);
-                    regionCard.setVisibility(View.GONE);
-                    plateCard.setVisibility(View.GONE);
-                    vihicalCard.setVisibility(View.GONE);
-                    nextImage.setVisibility(View.GONE);
-                    emptyImage.setVisibility(View.VISIBLE);
-                        Toast.makeText(context,responseString+"No Internet Connection",Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, t.getMessage()+"", Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
@@ -234,33 +199,34 @@ public class WithApiActivity extends AppCompatActivity  implements IPickResult,V
         }
     }
 
-    private void setDataToUi(JSONObject response) {
+    private void setDataToUi(JsonObject response, String file) {
         Log.d("response ", response.toString()+" ");
         try {
             //image path
-            imagepath="https://us-east-1.linodeobjects.com/platerec-api/uploads/"+df.format(date)+ response.getString("filename");
+//            imagepath="https://us-east-1.linodeobjects.com/platerec-api/uploads/"+df.format(date)+ response.get("filename").getAsString();
+            imagepath = file;
             //json array or results
-            JSONArray Jsresults = response.getJSONArray("results");
-            if (Jsresults.length()>0)
+            JsonArray Jsresults = response.getAsJsonArray("results");
+            if (Jsresults.size() >0)
             {
-                for (int i = 0; i < Jsresults.length(); i++) {
-                    JSONObject tabObj = Jsresults.getJSONObject(i);
-                    plate_txt.setText(tabObj.getString("plate"));
-                    region_txt.setText(String.valueOf((Double.parseDouble(tabObj.getString("score")) * 100)));
-                    vihical_txt.setText(response.getString("processing_time"));
-                    timeStamp= response.getString("timestamp");
-                        Picasso.with(context)
-                                .load(imagepath)
-                                .into(imageView, new Callback() {
-                                    @Override
-                                    public void onSuccess() {
-                                        progressBar.setVisibility(View.GONE);
-                                    }
-                                    @Override
-                                    public void onError() {
-
-                                    }
-                                });
+//                for (int i = 0; i < Jsresults.size(); i++) {
+                    JsonObject tabObj = Jsresults.get(0).getAsJsonObject();
+                    plate_txt.setText(tabObj.get("plate").getAsString());
+                    region_txt.setText(String.valueOf((Double.parseDouble(tabObj.get("score").getAsString()) * 100)));
+                    vihical_txt.setText(response.get("processing_time").getAsString());
+                    timeStamp= response.get("timestamp").getAsString();
+                    Picasso.with(context)
+                            .load(new File(imagepath))
+                            .into(imageView, new Callback() {
+                                @Override
+                                public void onSuccess() {
+                                    progressBar.setVisibility(View.GONE);
+                                }
+                                @Override
+                                public void onError() {
+                                    Log.i("Prudhvi Log", "onError: ");
+                                }
+                            });
                     regionCard.setVisibility(View.VISIBLE);
                     plateCard.setVisibility(View.VISIBLE);
                     vihicalCard.setVisibility(View.VISIBLE);
@@ -269,8 +235,8 @@ public class WithApiActivity extends AppCompatActivity  implements IPickResult,V
                     emptyImage.setVisibility(View.GONE);
                 }
 
-            }
-        } catch (JSONException e) {
+//            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -378,7 +344,7 @@ public class WithApiActivity extends AppCompatActivity  implements IPickResult,V
         Uri bmpUri = null;
         try {
             File file =  new File(Environment.getExternalStorageDirectory().getPath(),
-              ".Foldername/PlateRecognizer" + System.currentTimeMillis() + ".jpeg");
+                    ".Foldername/PlateRecognizer" + System.currentTimeMillis() + ".jpeg");
             file.getParentFile().mkdirs();
             FileOutputStream out = new FileOutputStream(file);
             bmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
